@@ -28,9 +28,9 @@ The plugin has only been tested on Windows 7 + Sublime Text 2.0.1 portable.
 
 Todo
 ======
+- Shortcuts/commands to move between all matching scopes for code element
 - Import os.path instead of os
 - Add to package control
-- Remove the keyboard shortcut and add a menu command
 
 License
 =======
