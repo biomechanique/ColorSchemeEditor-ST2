@@ -4,9 +4,9 @@ ColorSchemeEditor-ST2
 
 Screenshots
 ===========
-(https://raw.github.com/bobef/ColorSchemeEditor-ST2/master/screenshots/screen1.png)
-(https://raw.github.com/bobef/ColorSchemeEditor-ST2/master/screenshots/screen2.png)
-(https://raw.github.com/bobef/ColorSchemeEditor-ST2/master/screenshots/screen3.png)
+![Automatic scope display](https://raw.github.com/bobef/ColorSchemeEditor-ST2/master/screenshots/screen1.png)
+![Quick color selection (thirdparty plugin)](https://raw.github.com/bobef/ColorSchemeEditor-ST2/master/screenshots/screen2.png)
+![Real-time preview](https://raw.github.com/bobef/ColorSchemeEditor-ST2/master/screenshots/screen3.png)
 
 Usage
 =====
