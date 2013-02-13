@@ -32,6 +32,7 @@ Todo
 ======
 - Shortcuts/commands to move between all matching scopes for code element
 - Import os.path instead of os
+- view.settings().get('is_widget')
 - Add to package control
 
 License
