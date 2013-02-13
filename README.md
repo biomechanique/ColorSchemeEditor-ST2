@@ -26,6 +26,12 @@ Status
 ======
 The plugin has only been tested on Windows 7 + Sublime Text 2.0.1 portable.
 
+Todo
+======
+- Import os.path instead of os
+- Add to package control
+- Remove the keyboard shortcut and add a menu command
+
 License
 =======
 You are free to use the plugin at your own risk. The author takes no responsibility for what you do or not do with it.
