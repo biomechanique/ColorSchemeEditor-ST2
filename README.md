@@ -26,6 +26,15 @@ Status
 ======
 The plugin has only been tested on Windows 7 + Sublime Text 2.0.1 portable.
 
+Related information can also be found here http://www.sublimetext.com/forum/viewtopic.php?f=5&t=11130&p=43821
+
+Todo
+======
+- Shortcuts/commands to move between all matching scopes for code element
+- Import os.path instead of os
+- view.settings().get('is_widget')
+- Add to package control
+
 License
 =======
 You are free to use the plugin at your own risk. The author takes no responsibility for what you do or not do with it.
