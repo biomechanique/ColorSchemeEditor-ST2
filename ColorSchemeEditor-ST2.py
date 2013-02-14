@@ -1,14 +1,16 @@
-import sublime, sublime_plugin, os
+import sublime, sublime_plugin, os.path
 
 # globals suck, but don't know how to pass data between the classes
 _schemeEditor = None
 _skipOne = 0
 _wasSingleLayout = None
+_lastScope = None
+_lastScopeIndex = 0
 
-def find_best_match ( scope, founds ):
+def find_matches ( scope, founds ):
 	global _schemeEditor
 
-	ret = None
+	ret = []
 	maxscore = 0
 
 	# find the scope in the xml that matches the most
@@ -19,31 +21,40 @@ def find_best_match ( scope, founds ):
 		foundstrs = foundstr.split( ',' )
 		fstrlen = 0
 		for fstr in foundstrs:
-			pos += fstrlen
 			fstrlen = len( fstr )
 			fstr = fstr.lstrip( ' ' )
 			padleft = fstrlen - len( fstr )
-			pos += padleft
 			fstr = fstr.rstrip( ' ' )
-			fstrlen += 1
 			score = sublime.score_selector( scope, fstr )
-			if maxscore == 0 or score > maxscore:
-				maxscore = score
-				ret = [ found, pos, pos + len( fstr ) ]
+			if score > 0:
+				a = found.a + pos + padleft
+				ret.append( [ score, sublime.Region( a, a + len( fstr ) ) ] )
+			pos += fstrlen + 1
 
-	if ret == None:
-		return ret
+	if len( ret ) == 0:
+		return None
 	else:
-		a = ret[0].a
-		return sublime.Region( a + ret[1], a + ret[2] )
+		return ret
+
+def display_scope ( region ):
+	global _schemeEditor
+	# doest change the selection if previous selection was on the same line
+	sel = _schemeEditor.sel()
+	sel.clear()
+	sel.add( region )
+	_schemeEditor.show_at_center( region )
 
 
 def update_view_status ( view ):
-	found = None;
+
+	global _lastScope, _lastScopeIndex
+
+	found = None
+	_lastScope = []
+	_lastScopeIndex = 0
 	
 	# find the scope under the cursor
 	scope_name = view.scope_name( view.sel()[0].a ).strip( ' ' ).replace( ' ', ' > ' )
-	sublime.status_message( 'Syntax scope: ' + scope_name )
 	scopes = reversed( scope_name.split( ' > ' ) )
 	
 	# convert to regex and look for the scope in the scheme editor
@@ -59,21 +70,23 @@ def update_view_status ( view ):
 		regex += ')( ?, ?[a-z\.]*)*</string>'
 		
 		found = _schemeEditor.find_all( regex, 0 )
-		found = find_best_match( scope, found )
+		found = find_matches( scope, found )
 		if found != None:
-			break
+			_lastScope += found
 
-	_schemeEditor.sel().clear()
-	if found == None:
-		_schemeEditor.sel().add( sublime.Region( 0, 0 ) )
-		_schemeEditor.show( 0 )
+	scopes = len( _lastScope )
+	sublime.status_message( str( scopes ) +  ' matches: ' + scope_name )
+	if scopes == 0:
+		_lastScope = None
+		display_scope( sublime.Region( 0, 0 ) )
 	else:
-		_schemeEditor.sel().add( found )
-		_schemeEditor.show_at_center( found )
+		_lastScope.sort( key = lambda f: f[1].a )
+		_lastScope.sort( key = lambda f: f[0], reverse = True )
+		display_scope( _lastScope[0][1] )
 
 
 def kill_scheme_editor ():
-	global _schemeEditor, _skipOne, _wasSingleLayout
+	global _schemeEditor, _skipOne, _wasSingleLayout, _lastScope, _lastScopeIndex
 	# this crashes ST2 if placed here
 	# if _wasSingleLayout != None:
 	# 	_wasSingleLayout.set_layout( {
@@ -84,10 +97,12 @@ def kill_scheme_editor ():
 	_skipOne = 0
 	_wasSingleLayout = None
 	_schemeEditor = None
+	_lastScope = None
+	_lastScopeIndex = 0
 
 
 # listeners to update our scheme editor
-class NavigationHistoryRecorder ( sublime_plugin.EventListener ):
+class NavigationListener ( sublime_plugin.EventListener ):
 
 	def on_close ( self, view ):
 		global _schemeEditor
@@ -98,7 +113,7 @@ class NavigationHistoryRecorder ( sublime_plugin.EventListener ):
 	def on_selection_modified ( self, view ):
 		global _schemeEditor, _skipOne
 		if _schemeEditor != None:
-			if _schemeEditor.id() != view.id():
+			if _schemeEditor.id() != view.id() and not view.settings().get( 'is_widget' ):
 				# for some reason this callback is called twice - for mouse down and mouse up
 				if _skipOne == 1:
 					_skipOne = 0
@@ -107,11 +122,39 @@ class NavigationHistoryRecorder ( sublime_plugin.EventListener ):
 					update_view_status( view )
 
 
+class EditColorSchemeNextScopeCommand ( sublime_plugin.TextCommand ):
+	def run ( self, edit ):
+		global _schemeEditor, _lastScope, _lastScopeIndex
+
+		if _schemeEditor != None and _lastScope != None:
+			scopes = len( _lastScope )
+			if scopes > 1:
+				_lastScopeIndex += 1
+				if _lastScopeIndex == scopes:
+					_lastScopeIndex = 0
+				display_scope( _lastScope[_lastScopeIndex][1] )
+			sublime.status_message( 'Scope ' + str( _lastScopeIndex + 1 ) + ' of ' + str( scopes ) )
+
+
+
+class EditColorSchemePrevScopeCommand ( sublime_plugin.TextCommand ):
+	def run ( self, edit ):
+		global _schemeEditor, _lastScope, _lastScopeIndex
+
+		if _schemeEditor != None and _lastScope != None:
+			scopes = len( _lastScope )
+			if scopes > 1:
+				if _lastScopeIndex == 0:
+					_lastScopeIndex = scopes - 1
+				else:
+					_lastScopeIndex -= 1
+				display_scope( _lastScope[_lastScopeIndex][1] )
+			sublime.status_message( 'Scope ' + str( _lastScopeIndex + 1 ) + ' of ' + str( scopes ) )
+
+
 class EditCurrentColorSchemeCommand ( sublime_plugin.TextCommand ):
-	'''Edit current color scheme
-	'''
 	
-	def run( self, edit ):
+	def run ( self, edit ):
 		global _schemeEditor, _wasSingleLayout
 		
 		view = self.view
