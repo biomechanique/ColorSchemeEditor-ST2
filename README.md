@@ -19,6 +19,7 @@ Usage
 - Open some file and press F12
 - Your color scheme should open in separate pane
 - As you put the cursor on different source elements, the other pane will find and display the XML element that is affecting this element
+- If more than one style element affects code element, the most relevant match is displayed first and you can go to other matches with Ctrl+Alt+Right and Ctrl+Alt+Left
 - Change the styles as you wish and save so Sublime Text will reload the styles and display your changes
 - When you are done editing press F12 again or close the view of the scheme file
 
@@ -30,9 +31,6 @@ Related information can also be found here http://www.sublimetext.com/forum/view
 
 Todo
 ======
-- Shortcuts/commands to move between all matching scopes for code element
-- Import os.path instead of os
-- view.settings().get('is_widget')
 - Add to package control
 
 License
