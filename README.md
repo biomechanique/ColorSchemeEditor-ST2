@@ -26,8 +26,8 @@ Usage
 Status
 ======
 Tested on:
-Windows 7 + Sublime Text 2.0.1 portable
-OSX 10.8.3 + Sublime Text 2.0.1
+- Windows 7 + Sublime Text 2.0.1 portable
+- OSX 10.8.3 + Sublime Text 2.0.1
 
 Related information can also be found here http://www.sublimetext.com/forum/viewtopic.php?f=5&t=11130&p=43821
 
